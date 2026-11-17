@@ -1,16 +1,14 @@
-import type { ComponentProps } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { IconLoader2, type Icon } from '@tabler/icons-react'
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type ButtonSize = 'sm' | 'md' | 'lg'
 
-export type ButtonProps = ComponentProps<'button'> & {
+type ButtonBaseProps = Omit<ComponentProps<'button'>, 'children'> & {
   /** Estilo del botón. Por defecto, `primary`. */
   variant?: ButtonVariant
   /** Tamaño del botón. Por defecto, `md`. */
   size?: ButtonSize
-  /** Icono de Tabler que se muestra junto al texto. */
-  icon?: Icon
   /** Lado en el que aparece el icono. Por defecto, `left`. */
   iconPosition?: 'left' | 'right'
   /** Muestra un indicador de carga y desactiva el botón. */
@@ -18,6 +16,27 @@ export type ButtonProps = ComponentProps<'button'> & {
   /** Ocupa todo el ancho disponible. */
   fullWidth?: boolean
 }
+
+type ButtonWithTextProps = ButtonBaseProps & {
+  /** Texto del botón. */
+  children: ReactNode
+  /** Icono de Tabler que se muestra junto al texto. */
+  icon?: Icon
+}
+
+type IconOnlyButtonProps = ButtonBaseProps & {
+  /** Sin texto: el botón muestra solo el icono. */
+  children?: undefined
+  /** Icono de Tabler. Obligatorio cuando el botón no tiene texto. */
+  icon: Icon
+  /**
+   * Descripción de la acción para lectores de pantalla y para el
+   * texto que aparece al pasar el ratón. Obligatoria cuando el botón no tiene texto.
+   */
+  'aria-label': string
+}
+
+export type ButtonProps = ButtonWithTextProps | IconOnlyButtonProps
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
@@ -30,10 +49,18 @@ const variantClasses: Record<ButtonVariant, string> = {
     'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus-visible:outline-red-600',
 }
 
+// Botón con texto: alto fijo y espacio a los lados
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'h-8 gap-1.5 rounded-md px-3 text-sm',
-  md: 'h-10 gap-2 rounded-lg px-4 text-sm',
-  lg: 'h-12 gap-2 rounded-lg px-5 text-base',
+  sm: 'h-8 gap-1.5 px-3 text-sm',
+  md: 'h-10 gap-2 px-4 text-sm',
+  lg: 'h-12 gap-2 px-5 text-base',
+}
+
+// Botón con solo icono: un círculo del mismo alto que el botón con texto
+const iconOnlySizeClasses: Record<ButtonSize, string> = {
+  sm: 'size-8',
+  md: 'size-10',
+  lg: 'size-12',
 }
 
 const iconSizes: Record<ButtonSize, number> = { sm: 16, md: 18, lg: 20 }
@@ -49,8 +76,10 @@ export function Button({
   type = 'button',
   className = '',
   children,
+  title,
   ...props
 }: ButtonProps) {
+  const iconOnly = children === undefined || children === null
   const iconSize = iconSizes[size]
   const icon = loading ? (
     <IconLoader2 size={iconSize} className="animate-spin" aria-hidden />
@@ -63,20 +92,28 @@ export function Button({
       type={type}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
+      // En el botón con solo icono, la descripción también aparece al pasar el ratón
+      title={title ?? (iconOnly ? props['aria-label'] : undefined)}
       className={[
-        'inline-flex items-center justify-center font-medium transition-colors',
+        'inline-flex shrink-0 items-center justify-center rounded-full font-medium transition-colors',
         'focus-visible:outline-2 focus-visible:outline-offset-2',
         'disabled:cursor-not-allowed disabled:opacity-50',
         variantClasses[variant],
-        sizeClasses[size],
-        fullWidth ? 'w-full' : '',
+        iconOnly ? iconOnlySizeClasses[size] : sizeClasses[size],
+        fullWidth && !iconOnly ? 'w-full' : '',
         className,
       ].join(' ')}
       {...props}
     >
-      {iconPosition === 'left' && icon}
-      {children}
-      {iconPosition === 'right' && icon}
+      {iconOnly ? (
+        icon
+      ) : (
+        <>
+          {iconPosition === 'left' && icon}
+          {children}
+          {iconPosition === 'right' && icon}
+        </>
+      )}
     </button>
   )
 }
