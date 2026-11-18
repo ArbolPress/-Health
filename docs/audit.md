@@ -221,6 +221,97 @@ Un agente (o una persona nueva en el proyecto) suele suponer los nombres más ha
 
 ---
 
+## 5. Prueba sin reglas
+
+**Qué se probó:** se pidió una pantalla de asistente usando solo los componentes del proyecto, sin ninguna regla de diseño escrita. El resultado es `src/screens/antes.tsx`, revisado tal como está en `main` en el commit `ee9cfc4`. **La pantalla no se ha cambiado.**
+
+**Qué se busca:** lo que sale mal cuando se construye sin reglas. Hay tres tipos de problema:
+- valores escritos a mano;
+- componentes copiados en vez de usados;
+- nombres distintos de los de los componentes.
+
+**Lo que sí salió bien:**
+- Se usan los cuatro componentes: Card (cabecera), Badge, Button (en tres sitios: nueva conversación, ideas para empezar y enviar; dos de ellos con solo icono) e Input.
+- No hay colores hex ni valores entre corchetes.
+- Los colores que aparecen ya existen en los componentes.
+- El botón de enviar lleva `type="submit"` (línea 201), la trampa señalada en la sección 4.
+
+### 5.1 Valores escritos a mano
+
+Todas las líneas son de `src/screens/antes.tsx`. En la columna **¿Existe en los componentes?**, «No» significa que el valor aparece por primera vez en esta pantalla.
+
+| Línea | Valor | Para qué | ¿Existe en los componentes? |
+| --- | --- | --- | --- |
+| 85 | `1200` (milisegundos) | Lo que tarda la respuesta de ejemplo | No. Es un tiempo de espera inventado. |
+| 103 | `max-w-3xl`, `gap-4`, `p-4`, `sm:p-6` | Ancho y márgenes de la pantalla | No hay ninguna regla de maquetación de pantallas. |
+| 130 | `rounded-xl`, `border-gray-200`, `bg-gray-50` | Caja del historial | Sí, pero mezclando dos variantes de Card (ver 5.2). |
+| 133 | `gap-4`, `p-6` | Estado vacío | Sí, son los de Card `md`, escritos a mano. |
+| 134 | `size-14`, `rounded-full`, `bg-teal-50`, `text-teal-700` | Círculo del icono del estado vacío | **`size-14` no existe.** Card usa `size-10` y `rounded-lg` para lo mismo. |
+| 135 | `size={28}` | Icono del estado vacío | **No.** Los iconos de los componentes miden 12, 14, 16, 18, 20 o 22. |
+| 138 | `text-lg`, `font-semibold`, `text-gray-900` | Título del estado vacío | **`text-lg` no existe.** Los componentes solo usan `text-xs`, `text-sm` y `text-base`. |
+| 139 | `mt-1`, `max-w-sm`, `text-sm`, `text-gray-600` | Texto del estado vacío | **`mt-1` no existe.** Card usa `mt-0.5` para el texto bajo un título. |
+| 143 | `max-w-md`, `gap-2` | Lista de ideas | — |
+| 154 | `gap-4`, `p-4` | Lista de mensajes | — |
+| 160 | `gap-1` | Separación entre autor y burbuja | — |
+| 162 | `text-xs`, `text-gray-500` | Autor y hora del mensaje | Sí, pero `text-xs` solo lo usa Badge `sm`. |
+| 167 | `max-w-md`, `rounded-2xl`, `px-4`, `py-2.5`, `text-sm` | Burbuja de mensaje | **`rounded-2xl` y `py-2.5` no existen.** Ningún componente usa ese radio, y todos fijan el alto con `h-*` en vez de con espacio arriba y abajo. |
+| 169 | `rounded-br-md`, `bg-teal-700`, `text-white` | Burbuja de la persona | Sí, es el color de Button `primary`. |
+| 170 | `rounded-bl-md`, `border-gray-200`, `bg-white`, `text-gray-900` | Burbuja del asistente | Sí, es el estilo de Card `outlined`. |
+| 191 | `gap-2` | Entre el campo y el botón de enviar | — |
+| 208 | `gap-1.5`, `text-xs`, `text-gray-500` | Aviso del pie | Parecido al mensaje de Input, pero con otros valores (ver 5.2). |
+| 209 | `size={14}` | Icono del aviso | Sí, pero en Badge `md`. Input usa 16 para el mismo tipo de icono. |
+
+**Resumen:**
+- **Cinco valores nuevos** que no existen en ningún componente: `size-14`, el icono de 28 px, `text-lg`, `rounded-2xl` y `py-2.5`.
+- **Los colores no son nuevos**, pero están todos escritos directamente: `teal-50`, `teal-700`, `gray-50`, `gray-200`, `gray-500`, `gray-600`, `gray-900` y `white`.
+
+### 5.2 Componentes copiados en vez de usados
+
+En cada fila: lo que la pantalla construye a mano, de qué componente copia los estilos y en qué se diferencia de él.
+
+| Líneas en `antes.tsx` | Qué se ha hecho a mano | Copia de | Diferencias |
+| --- | --- | --- | --- |
+| 128–131 | Caja del historial | Card: `rounded-xl` (`Card.tsx:53`), borde de `outlined` (`Card.tsx:25`) y fondo de `filled` (`Card.tsx:27`) | Mezcla dos variantes que en Card no se pueden combinar. No se usó Card porque su espacio interior es fijo y no se puede desplazar por dentro. |
+| 134–136 | Círculo con el icono del estado vacío | Cuadro del icono de Card (`Card.tsx:63`): `bg-teal-50` y `text-teal-700` | Otro tamaño (`size-14` frente a `size-10`), otra forma (círculo frente a esquinas redondeadas) y otro icono (28 frente a 22). |
+| 133–152 | Estado vacío completo: icono, título, texto y botones | No hay componente | Es un patrón que se repetirá en historial médico, citas o análisis. Hoy cada pantalla lo haría a su manera. |
+| 138 | Título del estado vacío (`h2`) | Título de Card (`Card.tsx:68`: `h3`, `text-base`, `font-semibold`) | Otro tamaño (`text-lg`) y otro nivel de título. No hay un componente de título. |
+| 165–174 | Burbuja de la persona | Button `primary` (`Button.tsx:43`): `bg-teal-700` y `text-white` | Toma el color de un botón para algo que no se puede pulsar, y le cambia el radio a `rounded-2xl` con una esquina `rounded-br-md`. |
+| 165–174 | Burbuja del asistente | Card `outlined` (`Card.tsx:25`): `border-gray-200` y `bg-white` | Otro radio (`rounded-2xl` frente a `rounded-xl`) y otro espacio interior (`px-4 py-2.5` frente a `p-4`, `p-6` o `p-8`). |
+| 178–183 | «El asistente está escribiendo…» | Badge `neutral` (`Badge.tsx:19`) | No es una copia: es **un componente usado para otra cosa**. Badge es una etiqueta de estado, pero aquí indica una espera. Button ya tiene su propia forma de mostrar una espera (`loading`, `Button.tsx:84–85`, con el círculo que gira), y esta pantalla no la reutiliza. |
+| 208–211 | Aviso del pie con icono | Mensaje de ayuda de Input (`Input.tsx:95–104`: `flex items-center gap-1 text-sm`, icono de 16 y `text-gray-600`) | Es el mismo patrón (icono más texto corto) con todos los valores distintos: `gap-1.5`, `text-xs`, icono de 14 y `text-gray-500`. |
+
+**Resumen:** faltan tres componentes que la pantalla ha tenido que inventar:
+- **burbuja de mensaje** (o `Message`);
+- **estado vacío** (`EmptyState`);
+- **nota con icono**, para avisos cortos.
+
+Además, la caja del historial pide una Card que se pueda desplazar por dentro, o una variante sin espacio interior.
+
+### 5.3 Nombres distintos de los de los componentes
+
+| Línea en `antes.tsx` | Nombre en la pantalla | Nombre equivalente en los componentes | Problema |
+| --- | --- | --- | --- |
+| Nombre del archivo y 42 | Archivo `antes.tsx` (en minúsculas) | `Button.tsx`, `Card.tsx`… (con mayúscula inicial) | Las pantallas y los componentes siguen convenciones distintas. En las pantallas es a propósito, porque el nombre del archivo es su dirección (`#/antes`), pero no está escrito en ningún sitio. |
+| 19 y 156 | `author: 'user' \| 'assistant'` y `mine` | `variant` (Button y Card) o `color` (Badge) | Las dos burbujas se distinguen con un `if` según quién escribe, no con una variante con nombre. Si se convierten en componente, habrá que elegir un tercer nombre (`variant`, `color` o `author`), y ya hay dos en uso. |
+| 24–28 y 144 | `{ icon, text }` en las ideas | `icon` sí coincide, pero el texto en Button se llama `children` | `text` no existe en ningún componente: se usa solo dentro de la pantalla. |
+| 45 y 178 | `typing` («escribiendo») | `loading` en Button (`Button.tsx:15`) | Es el mismo concepto, esperar a que algo termine, con otro nombre y otro aspecto. |
+| 100 y 121 | `isEmpty` | — | Los componentes no usan el prefijo `is` (`loading`, `fullWidth`, `dot`), pero la pantalla sí. |
+| 112–114 | Badge `color="success"` con el texto «Disponible» | `success` en Badge significa «hecho, correcto» | Se usa un color de resultado para indicar disponibilidad. Para eso Badge no tiene ningún nombre adecuado, así que se reutiliza `success`. |
+| 169 | `bg-teal-700` (sin nombre) | `primary` en Button | El color principal aparece en la burbuja con su valor de Tailwind, no con el nombre `primary`. Si cambia el color de la marca, la burbuja no cambiará con los botones. |
+| 193 | `label="Tu mensaje"` | `label` en Input es obligatorio y siempre visible | El nombre coincide, pero en un chat no se suele querer un título visible encima del campo. Input no permite ocultarlo. |
+
+### 5.4 Conclusión
+
+Sin reglas escritas, una sola pantalla:
+- **inventa cinco valores** que no existen en el sistema;
+- **copia estilos de tres componentes** (Button, Card e Input) en vez de usarlos;
+- **construye a mano tres piezas** que deberían ser componentes;
+- **pone nombres nuevos** (`typing`, `author`, `text`, `isEmpty`) a cosas que ya tenían nombre o que lo necesitarán.
+
+Cada pantalla nueva repetiría estos problemas a su manera. Por eso los próximos pasos de abajo, sobre todo definir colores y escalas con nombre propio y escribir los nombres en `AGENTS.md`, son lo que haría falta antes de la versión «después».
+
+---
+
 ## Próximos pasos sugeridos
 
 Esta auditoría no cambia nada. Lo siguiente que haría falta, en este orden:
