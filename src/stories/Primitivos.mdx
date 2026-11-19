@@ -1,0 +1,99 @@
+import { Meta, Unstyled } from '@storybook/addon-docs/blocks'
+import tokens from '../../tokens/tokens.json'
+import {
+  BorderWidths,
+  Breakpoints,
+  ColorPalettes,
+  FontFamilies,
+  FontSizes,
+  FontWeights,
+  LineHeights,
+  RadiusScale,
+  ShadowPieces,
+  SpacingScale,
+} from './Primitivos.blocks'
+
+export const primitive = tokens.primitive
+export const inter = primitive['font-family'].inter.$value
+
+<Meta title="Fundamentos/Primitivos" />
+
+# Primitivos
+
+Son los valores en bruto de DSHealth: la capa **primitive** de `tokens/tokens.json`. Todo lo que se ve en esta página se lee de ese archivo, así que **si cambia el archivo, cambia la página**.
+
+Los primitivos no dicen para qué sirve cada valor, solo cuál es. Por ejemplo, `color.brand.500` es un azul, pero todavía no es «el color principal». Esos nombres con significado (`primary`, `danger`…) llegarán en otra capa.
+
+## Color
+
+Paletas de Tailwind CSS v4, copiadas tal cual, y la escala de la marca (`brand`). Debajo de cada muestra aparece su valor en hex. Al pasar el ratón se ve el valor original en oklch.
+
+<Unstyled>
+  <ColorPalettes group={primitive.color} />
+</Unstyled>
+
+## Espaciado
+
+Escala numérica en la que `100` son 4 px.
+
+<Unstyled>
+  <SpacingScale group={primitive.spacing} />
+</Unstyled>
+
+## Radios
+
+Misma escala que el espaciado: `100` son 4 px. `full` redondea del todo.
+
+<Unstyled>
+  <RadiusScale group={primitive.radius} />
+</Unstyled>
+
+## Grosores de borde
+
+Con los nombres de Tailwind: `1` es 1 px.
+
+<Unstyled>
+  <BorderWidths group={primitive['border-width']} />
+</Unstyled>
+
+## Familia tipográfica
+
+<Unstyled>
+  <FontFamilies group={primitive['font-family']} />
+</Unstyled>
+
+## Tamaños de texto
+
+<Unstyled>
+  <FontSizes group={primitive['font-size']} family={inter} />
+</Unstyled>
+
+## Pesos de texto
+
+<Unstyled>
+  <FontWeights group={primitive['font-weight']} family={inter} />
+</Unstyled>
+
+## Interlineados
+
+Misma escala que el espaciado, en rem: `100` son 4 px. Las bandas marcan el alto de cada línea.
+
+<Unstyled>
+  <LineHeights group={primitive['line-height']} family={inter} />
+</Unstyled>
+
+## Sombras
+
+Las sombras se guardan **por piezas**: desplazamiento (`offset`), desenfoque (`blur`) y color. Cada fila cambia una pieza y deja fijas las otras dos.
+
+<Unstyled>
+  <ShadowPieces group={primitive.shadow} />
+</Unstyled>
+
+## Anchos de pantalla
+
+Los *breakpoints* son los anchos de pantalla a partir de los cuales una página puede cambiar su diseño. Las barras son proporcionales al más ancho.
+
+<Unstyled>
+  <Breakpoints group={primitive.breakpoint} />
+</Unstyled>
