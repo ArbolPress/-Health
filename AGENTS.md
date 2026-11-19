@@ -23,3 +23,15 @@ DSHealth reúne las piezas con las que se construye la interfaz de Health: funda
 - **Siempre en una rama con PR:** nunca se trabaja directamente en `main`. Cada cambio va en su propia rama y se propone mediante una pull request.
 - **Explica los cambios sin jerga:** di qué has cambiado y por qué con palabras sencillas, para que cualquiera lo entienda aunque no programe.
 - **Si cambias `package.json`, actualiza `package-lock.json` en la misma PR**, para que los dos archivos vayan siempre a la par.
+
+## Decisiones
+
+Las decisiones del design system viven en `docs/adr/`, una por archivo. Cada una es un ADR (*Architecture Decision Record*, registro de decisión).
+
+- **Léelas antes de proponer cualquier cambio** que afecte al alcance de DSHealth o a sus principios.
+- **Nunca las contradigas sin escribir un ADR nuevo.** Si un cambio va en contra de una decisión, primero se escribe un ADR que la sustituya y se explica por qué. Después se hace el cambio.
+- **Cada ADR nuevo se apunta en la lista de abajo en la misma PR** en la que se crea.
+
+| ADR | Qué decide |
+| --- | --- |
+| [ADR-001 · Alcance y principios](docs/adr/001-alcance.md) | Qué entra y qué queda fuera de DSHealth, los cinco principios que debe cumplir todo cambio y la lista de comprobación de cada PR. |
