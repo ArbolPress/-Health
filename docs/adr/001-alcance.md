@@ -10,7 +10,8 @@
 
 **Aceptado.**
 
-**Cómo se revisa:** se revisa a mano en cada PR, con la lista de comprobación que aparece al final de la sección Decisión.
+- **Cómo se revisa:** a mano en cada PR, con la lista de comprobación que aparece al final de la sección Decisión.
+- **Revisión del 19 de noviembre de 2026:** se reescribieron los cinco principios para que todos se puedan comprobar, y se añadió la tabla «Cómo se comprueba cada principio».
 
 ## Contexto
 
@@ -78,76 +79,116 @@ Cada pantalla nueva repetiría estos problemas a su manera. Este ADR fija qué e
 
 ### Cinco principios
 
-Cada principio dice qué se exige y cómo se comprueba en una PR.
+Cada principio dice qué se exige y cómo se comprueba en una PR. Lo que se exige y lo que se comprueba es lo mismo: si la comprobación pasa, el principio se cumple.
+
+**A qué archivos se aplican:**
+- Se aplican a los componentes (`src/components/*.tsx`) y a las pantallas (`src/screens/*.tsx`).
+- No se aplican a las historias de Storybook (`*.stories.tsx`) ni a la página de muestra de Tailwind (`src/TailwindPage.tsx`). Esa página existe precisamente para enseñar los valores de Tailwind.
 
 #### 1. Todo valor visual sale de un token
 
-Un *token* es un valor con nombre propio de DSHealth, por ejemplo `primary` en lugar de `teal-700`.
+Un *token* es un valor con nombre propio de DSHealth, por ejemplo `primary` en lugar de `teal-700`. La lista de tokens la fijará el ADR-002, Fundamentos.
 
-Colores, espaciados, radios, tamaños de texto, sombras y tamaños de icono se usan siempre por su nombre de DSHealth. No se permiten:
+Toda clase que da color, radio, tamaño de texto, sombra o espaciado usa un nombre de esa lista. Lo mismo vale para los tamaños de icono. Además, nunca se permiten:
 - colores de la paleta de Tailwind escritos directamente (`teal-700`, `gray-200`…);
 - colores hex (`#0f766e`);
 - valores entre corchetes (`w-[13px]`, `max-w-[85%]`);
 - tamaños de icono escritos como números (`size={28}`).
 
-**Cómo se comprueba:** en los archivos cambiados de `src/` no aparece ningún color de la paleta de Tailwind, ningún `#` de color, ningún corchete en las clases ni ningún `size={número}` en un icono. Mientras no exista el ADR-002, cada excepción se anota en la PR.
+**Cómo se comprueba, revisando el código:** en los archivos cambiados no aparece nada de la lista anterior, y cada clase de color, radio, texto, sombra o espaciado usa un nombre de la lista de tokens del ADR-002.
 
-#### 2. Las pantallas solo usan componentes; no los copian
+**Mientras no exista el ADR-002**, no hay lista de tokens, así que el principio no puede cumplirse. Cada valor que no la cumpla se anota en la PR como excepción, con su archivo y su línea.
 
-Una pantalla de `src/screens/` se construye con componentes de DSHealth. Puede usar clases de maquetación (`flex`, `grid`, separaciones con tokens), pero no da a sus elementos colores, radios, bordes ni tamaños de texto propios.
+#### 2. Las pantallas solo usan componentes y clases de maquetación
 
-Si una pantalla necesita una pieza que no existe, primero se crea el componente en `src/components/` y después se usa.
+Una pantalla de `src/screens/` se construye con componentes de DSHealth. Fuera de ellos, solo puede usar **clases de maquetación**, que colocan cosas pero no les dan aspecto:
+- disposición: `flex`, `grid`, `items-*`, `justify-*`, `flex-*`, `order-*`;
+- tamaño y posición: `w-*`, `h-*`, `min-*`, `max-*`, `size-*`, `relative`, `absolute`, `inset-*`, `overflow-*`;
+- separaciones: `gap-*`, `p-*`, `m-*`, `space-*`.
+- alineación del texto: `text-left`, `text-center`, `text-right`.
 
-**Cómo se comprueba:** los archivos de `src/screens/` no tienen clases de color (`bg-*`, `text-*` de color, `border-*` de color), de radio (`rounded-*`) ni de tamaño de texto. Ningún bloque de la pantalla repite los estilos de un componente existente.
+No puede usar **clases de aspecto**, como `bg-*`, `text-*` (salvo las de alineación), `font-*`, `border-*`, `rounded-*`, `shadow-*`, `ring-*` u `outline-*`. Si una pantalla necesita una pieza que no existe, primero se crea el componente en `src/components/` y después se usa.
+
+**Cómo se comprueba, revisando el código:** en los archivos cambiados de `src/screens/`, todas las clases están en la lista de maquetación, y ninguna está en la de aspecto.
 
 #### 3. Todo componente está documentado antes de usarse
 
-Cada componente de `src/components/` tiene:
-- su archivo de historias (`*.stories.tsx`), con todas sus variantes, tamaños y estados;
-- su fila en `docs/componentes.md`.
+Cada componente de `src/components/` cumple tres cosas:
+- tiene un archivo de historias (`*.stories.tsx`);
+- en sus historias aparecen **todos los valores de cada prop de opciones** (`variant`, `size`…) y **cada prop que cambia su aspecto** (`disabled`, `loading`, `error`…);
+- tiene su fila en `docs/componentes.md`, con ✅ en la columna Storybook.
 
-**Cómo se comprueba:** si la PR añade o cambia un componente, también añade o actualiza sus historias y su fila en la tabla. `npm run build-storybook` termina sin errores.
+Una pantalla solo puede usar componentes que tengan ✅ en esa tabla.
+
+**Cómo se comprueba, en Storybook y en el código:**
+- **En Storybook:** se abre el componente y se ve cada valor de cada prop de opciones, y cada estado.
+- **En el código:** el componente tiene su fila con ✅ en `docs/componentes.md`, y `npm run build-storybook` termina sin errores.
 
 #### 4. Un concepto, un nombre
 
-La misma idea se llama igual en todos los componentes:
+La misma idea se llama igual en todos los componentes. Solo se pueden usar los nombres de esta tabla o los atributos normales de HTML (`disabled`, `type`, `placeholder`…):
 
 | Concepto | Nombre |
 | --- | --- |
-| Estilo | `variant` |
-| Tamaño | `size`, con `sm`, `md` y `lg` |
-| Peligro o error | `danger` |
+| Estilo del componente | `variant` |
+| Tamaño | `size`, con los valores `sm`, `md` y `lg` |
+| Estilo para peligro o error | el valor `danger` (por ejemplo, `variant="danger"`) |
+| Mensaje de error de un campo | `error` (un texto) |
+| Mensaje de ayuda de un campo | `hint` (un texto) |
+| Título de un campo | `label` |
 | Esperando a que algo termine | `loading` |
 | Icono (se pasa el icono, no `<Icono />`) | `icon` |
-| Texto del componente | `children` |
+| Lado del icono | `iconPosition`, con los valores `left` y `right` |
+| Contenido principal del componente | `children` |
 
 Los nombres se documentan en `AGENTS.md` para que los agentes los acierten a la primera.
 
-**Cómo se comprueba:** las props nuevas usan los nombres de la tabla. Si una PR necesita un nombre nuevo, lo añade a la tabla y a `AGENTS.md` en la misma PR.
+**Hay dos excepciones conocidas**, que se corregirán en su propia PR:
+- `color` en Badge, que debería ser `variant`;
+- `padding` en Card, que debería ser `size`.
 
-#### 5. Accesible según WCAG 2.2 AA, en todo
+**Cómo se comprueba, revisando el código:**
+- cada prop nueva o cambiada está en la tabla, o es un atributo normal de HTML;
+- si una PR necesita un nombre nuevo, lo añade a la tabla y a `AGENTS.md` en la misma PR.
 
-WCAG 2.2 es la norma internacional de accesibilidad web. AA es su nivel intermedio. Se aplica a todos los componentes y todas las pantallas, sin excepciones:
-- **Contraste:** al menos 4,5:1 para el texto, y 3:1 para el texto grande, los iconos que transmiten información y los bordes de los controles.
-- **Teclado:** todo se puede usar con el teclado, con el foco siempre visible.
-- **Nombres:** todo control tiene un nombre que lee el lector de pantalla. Por ejemplo, el `aria-label` en los botones con solo icono.
-- **Tamaño:** las zonas que se pulsan miden al menos 24 × 24 px.
-- **Color:** el color nunca es la única forma de transmitir algo. Un error lleva también texto o icono.
+#### 5. Accesible: cinco comprobaciones de WCAG 2.2 AA
 
-**Cómo se comprueba:** se revisan las historias de Storybook de lo que cambia la PR:
-- recorriéndolas solo con el teclado;
-- midiendo el contraste de cada combinación de colores nueva;
-- comprobando que cada control tiene nombre.
+WCAG 2.2 es la norma internacional de accesibilidad web, y AA es su nivel intermedio. El objetivo es cumplir WCAG 2.2 AA en todo.
+
+La norma completa tiene decenas de criterios y no se puede revisar entera en cada PR. Por eso, **en cada cambio se comprueban estos cinco**, sobre sus historias de Storybook:
+
+1. **Contraste:**
+   - el texto tiene al menos 4,5:1;
+   - el texto grande (24 px o más, o 18,7 px o más en negrita) tiene al menos 3:1;
+   - los iconos que transmiten información y los bordes de los controles tienen al menos 3:1.
+
+   Se mide con el inspector del navegador o con cualquier comprobador de contraste.
+2. **Teclado:** todo se alcanza y se usa solo con el teclado (Tab, Enter, Espacio), y el foco se ve siempre.
+3. **Nombres:** cada control tiene un nombre para el lector de pantalla. Se ve en la pestaña de accesibilidad del inspector del navegador.
+4. **Tamaño:** cada zona que se pulsa mide al menos 24 × 24 px. Se mide con la regla de Storybook.
+5. **Color:** ningún estado se distingue solo por el color. Un error, por ejemplo, lleva también texto o icono.
+
+**Cómo se comprueba, en Storybook:** se abren las historias de lo que cambia la PR y se hacen las cinco comprobaciones.
+
+### Cómo se comprueba cada principio
+
+| Principio | Dónde se comprueba | Qué se mira |
+| --- | --- | --- |
+| 1. Todo valor visual sale de un token | Revisando el código | Sin colores de Tailwind, hex, corchetes ni tamaños de icono numéricos. Cada clase de color, radio, texto, sombra o espaciado usa un token del ADR-002, o está anotada como excepción. |
+| 2. Las pantallas solo usan componentes y clases de maquetación | Revisando el código | En `src/screens/`, todas las clases están en la lista de maquetación y ninguna en la de aspecto. |
+| 3. Todo componente está documentado antes de usarse | Mirándolo en Storybook (y en `docs/componentes.md`) | Todos los valores de cada prop de opciones, y cada estado, aparecen en una historia. El componente tiene su fila con ✅. |
+| 4. Un concepto, un nombre | Revisando el código | Cada prop nueva o cambiada está en la tabla de nombres o es un atributo de HTML. |
+| 5. Accesible: cinco comprobaciones de WCAG 2.2 AA | Mirándolo en Storybook | Contraste, teclado, nombres, tamaño de 24 × 24 px y que el color no sea la única señal. |
 
 ### Lista de comprobación para cada PR
 
 Se copia en la descripción de cada PR y se marca a mano:
 
-- [ ] **Tokens:** no hay colores de Tailwind, hex, valores entre corchetes ni tamaños de icono numéricos en `src/` (o cada excepción está anotada).
-- [ ] **Pantallas:** las pantallas de `src/screens/` solo usan componentes y clases de maquetación.
-- [ ] **Documentación:** cada componente nuevo o cambiado tiene historias en Storybook y su fila en `docs/componentes.md`.
-- [ ] **Nombres:** las props siguen la tabla de nombres. Los nombres nuevos están añadidos a la tabla y a `AGENTS.md`.
-- [ ] **Accesibilidad:** se ha comprobado lo que cambia con el teclado y el contraste, y todos los controles tienen nombre.
+- [ ] **1. Tokens (código):** sin colores de Tailwind, hex, corchetes ni tamaños de icono numéricos. Todo valor visual usa un token, o está anotado como excepción con su archivo y su línea.
+- [ ] **2. Pantallas (código):** en `src/screens/` solo hay componentes y clases de maquetación.
+- [ ] **3. Documentación (Storybook):** cada componente nuevo o cambiado muestra en sus historias todos los valores de sus props y todos sus estados, y tiene su fila con ✅ en `docs/componentes.md`.
+- [ ] **4. Nombres (código):** cada prop nueva o cambiada está en la tabla de nombres o es un atributo de HTML. Los nombres nuevos están añadidos a la tabla y a `AGENTS.md`.
+- [ ] **5. Accesibilidad (Storybook):** se han hecho las cinco comprobaciones (contraste, teclado, nombres, tamaño y color) en las historias de lo que cambia.
 
 ## Consecuencias
 
@@ -160,7 +201,7 @@ Se copia en la descripción de cada PR y se marca a mano:
 
 ### Lo que cuesta
 
-- **Los componentes actuales no cumplen todavía los principios 1 y 4.** Habrá que:
+- **Los componentes actuales no cumplen todavía los principios 1 y 4.** Las pantallas tampoco cumplen el 2: `src/screens/antes.tsx` usa clases de aspecto. Habrá que:
   - sustituir sus colores, radios y tamaños de icono por tokens, cuando exista el ADR-002;
   - renombrar `color` en Badge y `padding` en Card, para que pasen a ser `variant` y `size`.
 
