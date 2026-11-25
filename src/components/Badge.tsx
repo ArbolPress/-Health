@@ -15,17 +15,39 @@ export type BadgeProps = ComponentProps<'span'> & {
   dot?: boolean
 }
 
-const colorClasses: Record<BadgeColor, { badge: string; dot: string }> = {
-  neutral: { badge: 'bg-gray-100 text-gray-800 ring-gray-300', dot: 'bg-gray-500' },
-  info: { badge: 'bg-sky-50 text-sky-800 ring-sky-200', dot: 'bg-sky-500' },
-  success: { badge: 'bg-green-50 text-green-800 ring-green-200', dot: 'bg-green-500' },
-  warning: { badge: 'bg-amber-50 text-amber-800 ring-amber-200', dot: 'bg-amber-500' },
-  danger: { badge: 'bg-red-50 text-red-800 ring-red-200', dot: 'bg-red-500' },
+// Todas las clases de color, espaciado, borde, radio y texto son tokens de
+// componente (badge.*). Ver docs/tokens.md.
+const colorClasses: Record<BadgeColor, { badge: string; icon: string; dot: string }> = {
+  neutral: {
+    badge: 'bg-badge-background-neutral-subtle text-badge-text-neutral border-badge-border-neutral',
+    icon: 'text-badge-icon-neutral-subtle',
+    dot: 'bg-badge-icon-neutral-subtle',
+  },
+  info: {
+    badge: 'bg-badge-background-info-subtle text-badge-text-info border-badge-border-info',
+    icon: 'text-badge-icon-info',
+    dot: 'bg-badge-icon-info',
+  },
+  success: {
+    badge: 'bg-badge-background-success-subtle text-badge-text-success border-badge-border-success',
+    icon: 'text-badge-icon-success',
+    dot: 'bg-badge-icon-success',
+  },
+  warning: {
+    badge: 'bg-badge-background-warning-subtle text-badge-text-warning border-badge-border-warning',
+    icon: 'text-badge-icon-warning',
+    dot: 'bg-badge-icon-warning',
+  },
+  danger: {
+    badge: 'bg-badge-background-error-subtle text-badge-text-error border-badge-border-error',
+    icon: 'text-badge-icon-error',
+    dot: 'bg-badge-icon-error',
+  },
 }
 
 const sizeClasses: Record<BadgeSize, string> = {
-  sm: 'h-5 gap-1 px-1.5 text-xs',
-  md: 'h-6 gap-1.5 px-2 text-sm',
+  sm: 'h-5 gap-badge-gap px-badge-padding-x-sm text-badge-sm',
+  md: 'h-6 gap-badge-gap px-badge-padding-x text-badge',
 }
 
 export function Badge({
@@ -40,7 +62,7 @@ export function Badge({
   return (
     <span
       className={[
-        'inline-flex items-center rounded-full font-medium whitespace-nowrap ring-1 ring-inset',
+        'inline-flex items-center whitespace-nowrap rounded-badge-radius border-badge-border-width',
         colorClasses[color].badge,
         sizeClasses[size],
         className,
@@ -48,11 +70,11 @@ export function Badge({
       {...props}
     >
       {IconComponent ? (
-        <IconComponent size={size === 'sm' ? 12 : 14} aria-hidden />
+        <IconComponent size={size === 'sm' ? 12 : 14} className={colorClasses[color].icon} aria-hidden />
       ) : (
         dot && (
           <span
-            className={['size-1.5 rounded-full', colorClasses[color].dot].join(' ')}
+            className={['size-1.5 rounded-badge-radius', colorClasses[color].dot].join(' ')}
             aria-hidden
           />
         )

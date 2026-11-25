@@ -16,23 +16,24 @@ export type InputProps = Omit<ComponentProps<'input'>, 'size'> & {
   size?: InputSize
 }
 
-const sizeClasses: Record<InputSize, string> = {
-  sm: 'h-8 rounded-md text-sm',
-  md: 'h-10 rounded-lg text-sm',
-  lg: 'h-12 rounded-lg text-base',
+// Todas las clases de color, espaciado, borde, radio y texto son tokens de
+// componente (input.*). Ver docs/tokens.md.
+
+// La caja del campo: el borde, el fondo y el espacio lateral van aquí, y dentro
+// se colocan el icono y el texto uno al lado del otro.
+const boxSizeClasses: Record<InputSize, string> = {
+  sm: 'h-8 px-input-padding-x-sm',
+  md: 'h-10 px-input-padding-x',
+  lg: 'h-12 px-input-padding-x-lg',
 }
 
-const paddingClasses: Record<InputSize, { plain: string; withIcon: string }> = {
-  sm: { plain: 'px-2.5', withIcon: 'pr-2.5 pl-8' },
-  md: { plain: 'px-3', withIcon: 'pr-3 pl-9' },
-  lg: { plain: 'px-4', withIcon: 'pr-4 pl-11' },
+const textSizeClasses: Record<InputSize, string> = {
+  sm: 'text-input',
+  md: 'text-input',
+  lg: 'text-input-lg',
 }
 
-const iconClasses: Record<InputSize, { size: number; position: string }> = {
-  sm: { size: 16, position: 'left-2.5' },
-  md: { size: 18, position: 'left-3' },
-  lg: { size: 20, position: 'left-4' },
-}
+const iconSizes: Record<InputSize, number> = { sm: 16, md: 18, lg: 20 }
 
 export function Input({
   label,
@@ -51,25 +52,32 @@ export function Input({
   const message = error ?? hint
 
   return (
-    <div className={['flex flex-col gap-1.5', className].join(' ')}>
-      <label htmlFor={inputId} className="text-sm font-medium text-gray-900">
+    <div className={['flex flex-col gap-input-gap', className].join(' ')}>
+      <label htmlFor={inputId} className="flex gap-input-gap text-input-label text-input-text-neutral">
         {label}
         {required && (
-          <span className="ml-0.5 text-red-600" aria-hidden>
+          <span className="text-input-text-error" aria-hidden>
             *
           </span>
         )}
       </label>
 
-      <div className="relative">
+      <div
+        className={[
+          'flex items-center gap-input-gap rounded-input-radius border-input-border-width bg-input-background-neutral transition-colors',
+          'focus-within:outline-solid focus-within:outline-input-border-width-focus',
+          error
+            ? 'border-input-border-error focus-within:outline-input-border-error'
+            : 'border-input-border-neutral-strong focus-within:outline-input-border-focus',
+          'has-disabled:cursor-not-allowed has-disabled:border-input-border-neutral has-disabled:bg-input-background-neutral-disabled',
+          boxSizeClasses[size],
+        ].join(' ')}
+      >
         {IconComponent && (
           <IconComponent
-            size={iconClasses[size].size}
+            size={iconSizes[size]}
             aria-hidden
-            className={[
-              'pointer-events-none absolute top-1/2 -translate-y-1/2 text-gray-500',
-              iconClasses[size].position,
-            ].join(' ')}
+            className="pointer-events-none shrink-0 text-input-icon-neutral-subtle"
           />
         )}
         <input
@@ -78,14 +86,10 @@ export function Input({
           aria-invalid={error ? true : undefined}
           aria-describedby={message ? messageId : undefined}
           className={[
-            'w-full border bg-white text-gray-900 placeholder:text-gray-400 transition-colors',
-            'focus:outline-2 focus:outline-offset-0',
-            'disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500',
-            error
-              ? 'border-red-600 focus:outline-red-600'
-              : 'border-gray-300 hover:border-gray-400 focus:outline-teal-700',
-            sizeClasses[size],
-            IconComponent ? paddingClasses[size].withIcon : paddingClasses[size].plain,
+            'h-full min-w-0 flex-1 bg-transparent outline-none',
+            'text-input-text-neutral placeholder:text-input-text-neutral-subtle',
+            'disabled:cursor-not-allowed disabled:text-input-text-neutral-disabled',
+            textSizeClasses[size],
           ].join(' ')}
           {...props}
         />
@@ -95,11 +99,11 @@ export function Input({
         <p
           id={messageId}
           className={[
-            'flex items-center gap-1 text-sm',
-            error ? 'text-red-700' : 'text-gray-600',
+            'flex items-center gap-input-gap text-input-message',
+            error ? 'text-input-text-error' : 'text-input-text-neutral-subtle',
           ].join(' ')}
         >
-          {error && <IconAlertCircle size={16} aria-hidden className="shrink-0" />}
+          {error && <IconAlertCircle size={16} aria-hidden className="shrink-0 text-input-icon-error" />}
           {message}
         </p>
       )}

@@ -38,22 +38,44 @@ type IconOnlyButtonProps = ButtonBaseProps & {
 
 export type ButtonProps = ButtonWithTextProps | IconOnlyButtonProps
 
+// Todas las clases de color, espaciado, borde, radio y texto son tokens de
+// componente (button.*). Ver docs/tokens.md.
 const variantClasses: Record<ButtonVariant, string> = {
-  primary:
-    'bg-teal-700 text-white hover:bg-teal-800 active:bg-teal-900 focus-visible:outline-teal-700',
-  secondary:
-    'border border-gray-300 bg-white text-gray-900 hover:bg-gray-50 active:bg-gray-100 focus-visible:outline-teal-700',
-  ghost:
-    'text-teal-800 hover:bg-teal-50 active:bg-teal-100 focus-visible:outline-teal-700',
-  danger:
-    'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 focus-visible:outline-red-600',
+  primary: [
+    'bg-button-background-brand text-button-text-brand-inverted',
+    'enabled:hover:bg-button-background-brand-hover enabled:active:bg-button-background-brand-pressed',
+    'disabled:bg-button-background-neutral-disabled',
+  ].join(' '),
+  secondary: [
+    'border-button-border-width border-button-border-neutral-strong',
+    'bg-button-background-neutral text-button-text-neutral',
+    'enabled:hover:bg-button-background-neutral-hover enabled:active:bg-button-background-neutral-pressed',
+    'disabled:bg-button-background-neutral-disabled',
+  ].join(' '),
+  ghost: [
+    'text-button-text-brand',
+    'enabled:hover:bg-button-background-neutral-hover enabled:active:bg-button-background-neutral-pressed',
+  ].join(' '),
+  danger: [
+    'bg-button-background-error text-button-text-error-inverted',
+    'enabled:hover:bg-button-background-error-hover enabled:active:bg-button-background-error-pressed',
+    'disabled:bg-button-background-neutral-disabled',
+  ].join(' '),
+}
+
+// Color del icono de cada variante
+const iconClasses: Record<ButtonVariant, string> = {
+  primary: 'text-button-icon-brand-inverted',
+  secondary: 'text-button-icon-neutral',
+  ghost: 'text-button-icon-brand',
+  danger: 'text-button-icon-error-inverted',
 }
 
 // Botón con texto: alto fijo y espacio a los lados
 const sizeClasses: Record<ButtonSize, string> = {
-  sm: 'h-8 gap-1.5 px-3 text-sm',
-  md: 'h-10 gap-2 px-4 text-sm',
-  lg: 'h-12 gap-2 px-5 text-base',
+  sm: 'h-8 gap-button-gap-sm px-button-padding-x-sm text-button',
+  md: 'h-10 gap-button-gap px-button-padding-x text-button',
+  lg: 'h-12 gap-button-gap px-button-padding-x-lg text-button-lg',
 }
 
 // Botón con solo icono: un círculo del mismo alto que el botón con texto
@@ -81,10 +103,11 @@ export function Button({
 }: ButtonProps) {
   const iconOnly = children === undefined || children === null
   const iconSize = iconSizes[size]
+  const iconColor = `${iconClasses[variant]} group-disabled:text-button-icon-neutral-disabled`
   const icon = loading ? (
-    <IconLoader2 size={iconSize} className="animate-spin" aria-hidden />
+    <IconLoader2 size={iconSize} className={`animate-spin ${iconColor}`} aria-hidden />
   ) : IconComponent ? (
-    <IconComponent size={iconSize} aria-hidden />
+    <IconComponent size={iconSize} className={iconColor} aria-hidden />
   ) : null
 
   return (
@@ -95,9 +118,9 @@ export function Button({
       // En el botón con solo icono, la descripción también aparece al pasar el ratón
       title={title ?? (iconOnly ? props['aria-label'] : undefined)}
       className={[
-        'inline-flex shrink-0 items-center justify-center rounded-full font-medium transition-colors',
-        'focus-visible:outline-2 focus-visible:outline-offset-2',
-        'disabled:cursor-not-allowed disabled:opacity-50',
+        'group inline-flex shrink-0 items-center justify-center rounded-button-radius transition-colors',
+        'focus-visible:outline-solid focus-visible:outline-button-border-width-focus focus-visible:outline-button-border-focus focus-visible:outline-offset-2',
+        'disabled:cursor-not-allowed disabled:text-button-text-neutral-disabled',
         variantClasses[variant],
         iconOnly ? iconOnlySizeClasses[size] : sizeClasses[size],
         fullWidth && !iconOnly ? 'w-full' : '',
