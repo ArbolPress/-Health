@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Tokens de DSHealth (archivos generados con npm run tokens) */
+@import "./styles/tokens.css";
+@import "./styles/theme.css";
+
 /*
   La página "Tailwind" construye los nombres de las clases a partir de listas
   (por ejemplo, bg-red-500). Tailwind solo genera las clases que encuentra

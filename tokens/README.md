@@ -263,6 +263,20 @@ Un token por nivel, encadenados con alias. Los tres son reales y están en `toke
 }
 ```
 
+## De los tokens al código: `npm run tokens`
+
+Los componentes no leen `tokens.json` directamente. El comando `npm run tokens` (`scripts/build-tokens.mjs`) genera tres archivos a partir de él:
+
+| Archivo | Qué es |
+| --- | --- |
+| `src/styles/tokens.css` | Una variable CSS por token, por ejemplo `--semantic-color-background-brand`. Los alias se convierten en referencias a otras variables, así que la cadena primitive → semantic → component se mantiene. |
+| `src/styles/theme.css` | Un bloque `@theme` de Tailwind que convierte los tokens semánticos y de componente en clases, como `bg-background-brand` o `px-button-padding-x`. |
+| `docs/tokens.md` | La tabla de cada token con su variable CSS y su clase de Tailwind. |
+
+- **Los tres archivos se generan: no se editan a mano.** Después de cambiar `tokens.json`, ejecuta `npm run tokens`.
+- **Para comprobar que están al día** sin escribir nada, ejecuta `npm run tokens -- --check`. Si alguno no lo está, el comando lo dice y termina con error.
+- **Cómo se forma cada clase:** la utilidad de Tailwind seguida del nombre del token, por ejemplo `bg-` + `background-brand`. Ninguna se llama igual que una clase que ya trae Tailwind, y las escalas de Tailwind no cambian.
+
 ## Lista de comprobación para un token nuevo
 
 - [ ] **Nivel:** está en el nivel correcto: `primitive` (qué valor es), `semantic` (para qué sirve) o `component` (dónde se usa).
@@ -282,4 +296,4 @@ Un token por nivel, encadenados con alias. Los tres son reales y están en `toke
 
 - **`primitive`:** 168 tokens. **Todavía no cumplen la regla de `$description`:** solo 2 la tienen. Se completará en su propia PR.
 - **`semantic`:** 97 tokens. Todos tienen `$description` y solo usan alias a `primitive`.
-- **`component`:** 120 tokens: Button (35), Input (29), Card (26) y Badge (30). Todos tienen `$description` y solo usan alias a `semantic`. Los componentes todavía no los usan.
+- **`component`:** 120 tokens: Button (35), Input (29), Card (26) y Badge (30). Todos tienen `$description` y solo usan alias a `semantic`. Los cuatro componentes ya los usan a través de sus clases de Tailwind.

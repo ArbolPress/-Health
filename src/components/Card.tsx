@@ -21,16 +21,18 @@ export type CardProps = Omit<ComponentProps<'div'>, 'title'> & {
   padding?: CardPadding
 }
 
+// Todas las clases de color, espaciado, borde, radio, sombra y texto son tokens
+// de componente (card.*). Ver docs/tokens.md.
 const variantClasses: Record<CardVariant, string> = {
-  outlined: 'border border-gray-200 bg-white',
-  elevated: 'bg-white shadow-md ring-1 ring-black/5',
-  filled: 'bg-gray-50',
+  outlined: 'border-card-border-width border-card-border-neutral bg-card-background-neutral',
+  elevated: 'bg-card-background-neutral shadow-card-elevation',
+  filled: 'bg-card-background-neutral-subtle',
 }
 
 const paddingClasses: Record<CardPadding, string> = {
-  sm: 'p-4 gap-3',
-  md: 'p-6 gap-4',
-  lg: 'p-8 gap-6',
+  sm: 'p-card-padding-sm gap-card-gap-sm',
+  md: 'p-card-padding gap-card-gap',
+  lg: 'p-card-padding-lg gap-card-gap-lg',
 }
 
 export function Card({
@@ -50,7 +52,7 @@ export function Card({
   return (
     <div
       className={[
-        'flex flex-col rounded-xl text-gray-900',
+        'flex flex-col rounded-card-radius text-card-text-neutral',
         variantClasses[variant],
         paddingClasses[padding],
         className,
@@ -58,26 +60,26 @@ export function Card({
       {...props}
     >
       {hasHeader && (
-        <div className="flex items-start gap-3">
+        <div className="flex items-start gap-card-gap-header">
           {IconComponent && (
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-teal-50 text-teal-700">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-card-radius-icon bg-card-background-brand-subtle text-card-icon-brand">
               <IconComponent size={22} aria-hidden />
             </span>
           )}
           <div className="min-w-0 flex-1">
-            {title && <h3 className="text-base font-semibold">{title}</h3>}
+            {title && <h3 className="text-card-title">{title}</h3>}
             {description && (
-              <p className="mt-0.5 text-sm text-gray-600">{description}</p>
+              <p className="text-card text-card-text-neutral-subtle">{description}</p>
             )}
           </div>
           {action && <div className="shrink-0">{action}</div>}
         </div>
       )}
 
-      {children && <div className="text-sm text-gray-700">{children}</div>}
+      {children && <div className="text-card text-card-text-neutral">{children}</div>}
 
       {footer && (
-        <div className="flex flex-wrap items-center gap-2 border-t border-gray-200 pt-4">
+        <div className="flex flex-wrap items-center gap-card-gap-footer border-t-card-border-width border-card-border-neutral pt-card-padding-footer">
           {footer}
         </div>
       )}

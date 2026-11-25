@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { IconHeartbeat } from '@tabler/icons-react'
 import tokens from '../../tokens/tokens.json'
+import tokenTable from '../../docs/tokens.md?raw'
 
 // Piezas visuales de la página «Fundamentos/Semánticos» de Storybook.
 // Cada token se enseña con su nombre y el primitivo al que apunta.
@@ -17,6 +18,22 @@ type ShadowValue = Record<'color' | 'offsetX' | 'offsetY' | 'blur' | 'spread', s
 type TokenNode = { $value?: unknown; $description?: string; [key: string]: unknown }
 
 const root = tokens as unknown as TokenNode
+
+// La clase de Tailwind de cada token se lee de docs/tokens.md, la tabla que genera
+// «npm run tokens». Así la página no repite la tabla: solo la consulta.
+const tailwindClasses = new Map(
+  [...tokenTable.matchAll(/^\| `([^`]+)` \| `[^`]+` \| `([^`]+)` \|$/gm)].map((m) => [m[1], m[2]]),
+)
+
+function TailwindClass({ path }: { path: string }) {
+  const cls = tailwindClasses.get(path)
+  if (!cls) return null
+  return (
+    <span className="font-mono text-xs text-gray-700">
+      clase: <span className="rounded-sm bg-gray-100 px-1 py-0.5">{cls}</span>
+    </span>
+  )
+}
 
 /** Lista los tokens de un grupo. Un token guardado en $root toma el nombre de su grupo. */
 function flatten(group: TokenNode, prefix: string[] = []): { name: string; token: TokenNode }[] {
@@ -113,6 +130,7 @@ function Label({ name, token }: { name: string; token: TokenNode }) {
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
       <Name>{name}</Name>
+      <TailwindClass path={`semantic.${name}`} />
       <Alias>{aliasPath(token.$value)}</Alias>
       {token.$description && <Note>{token.$description}</Note>}
     </div>
@@ -278,6 +296,7 @@ export function TypographyStyles() {
             </p>
             <div className="flex flex-col gap-0.5">
               <Name>typography.{name}</Name>
+              <TailwindClass path={`semantic.typography.font-size.${name}`} />
               <Alias>
                 font-size: {aliasPath(token.$value)} ({toPx(size)}px) · line-height:{' '}
                 {aliasPath(lineHeight.$value)} ({toPx(leading)}px) · font-weight: {aliasPath(weight.$value)}
@@ -415,6 +434,7 @@ export function ComponentTokens({ component }: { component: string }) {
               <Name>
                 {component}.{name}
               </Name>
+              <TailwindClass path={`component.${component}.${name}`} />
               <Alias>{target}</Alias>
               {primitiveLabel && <span className="pl-4 font-mono text-xs text-gray-500">→ {primitiveLabel}</span>}
               {token.$description && <Note>{token.$description}</Note>}
@@ -446,6 +466,7 @@ export function Elevations() {
             </div>
             <div className="flex flex-col gap-0.5">
               <Name>elevation.{name}</Name>
+              <TailwindClass path={`semantic.elevation.${name}`} />
               {Object.entries(pieces).map(([part, alias]) => (
                 <Alias key={part}>
                   {part}: {aliasPath(alias)}
