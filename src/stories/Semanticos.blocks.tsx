@@ -345,6 +345,87 @@ export function BorderWidths() {
   )
 }
 
+/** Sigue la cadena de alias (component → semantic → primitive) hasta el valor real. */
+function resolveDeep(value: unknown): unknown {
+  if (typeof value === 'string' && value.startsWith('{')) return resolveDeep(find(aliasPath(value)).$value)
+  return value
+}
+
+/** Muestra visual de un token según lo que es: color, sombra, peso, radio, borde o medida. */
+function ComponentSample({ property, value }: { property: string; value: unknown }) {
+  const resolved = resolveDeep(value)
+  if (property === 'elevation') {
+    const pieces = resolved as ShadowValue
+    const parts = (['offsetX', 'offsetY', 'blur', 'spread'] as const).map((p) => toCss(resolveDeep(pieces[p]) as Dimension))
+    const color = colorToCss(resolveDeep(pieces.color) as ColorValue)
+    return <div className="size-10 rounded-md bg-white" style={{ boxShadow: `${parts.join(' ')} ${color}` }} />
+  }
+  if (resolved && typeof resolved === 'object' && 'colorSpace' in resolved) {
+    return (
+      <div
+        className="size-10 rounded-md ring-1 ring-black/10 ring-inset"
+        style={{ background: colorToCss(resolved as ColorValue) }}
+      />
+    )
+  }
+  if (typeof resolved === 'number') {
+    return (
+      <span className="w-10 text-center text-xl text-gray-900" style={{ fontWeight: resolved }}>
+        Aa
+      </span>
+    )
+  }
+  const dimension = resolved as Dimension
+  if (property === 'radius') {
+    return <div className="size-10 bg-sky-500" style={{ borderRadius: toCss(dimension) }} />
+  }
+  if (property === 'border-width') {
+    return <div className="size-10 rounded-md border-solid border-gray-900" style={{ borderWidth: toCss(dimension) }} />
+  }
+  if (['padding', 'padding-x', 'gap'].includes(property)) {
+    return (
+      <div className="flex w-10 items-center">
+        <div className="h-3 rounded-sm bg-sky-500" style={{ width: toCss(dimension) }} />
+      </div>
+    )
+  }
+  return <span className="w-10 text-center font-mono text-xs text-gray-700">{toPx(dimension)}px</span>
+}
+
+/** Los tokens de un componente, cada uno con el semántico al que apunta y el valor final. */
+export function ComponentTokens({ component }: { component: string }) {
+  const group = find(`component.${component}`) as TokenNode
+  const list = flatten(group)
+  return (
+    <div className="flex flex-col divide-y divide-gray-200">
+      {list.map(({ name, token }) => {
+        const property = name.split('.')[0]
+        const target = aliasPath(token.$value)
+        const primitive = find(target).$value
+        const primitiveLabel =
+          typeof primitive === 'string'
+            ? aliasPath(primitive)
+            : property === 'elevation'
+              ? 'varias piezas de primitive.shadow'
+              : ''
+        return (
+          <div key={name} className="grid grid-cols-[3rem_1fr] items-center gap-4 py-3">
+            <ComponentSample property={property} value={token.$value} />
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <Name>
+                {component}.{name}
+              </Name>
+              <Alias>{target}</Alias>
+              {primitiveLabel && <span className="pl-4 font-mono text-xs text-gray-500">→ {primitiveLabel}</span>}
+              {token.$description && <Note>{token.$description}</Note>}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 /** Elevaciones como tarjetas, con las piezas de sombra que las forman. */
 export function Elevations() {
   return (
