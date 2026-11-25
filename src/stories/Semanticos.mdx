@@ -1,0 +1,90 @@
+import { Meta, Unstyled } from '@storybook/addon-docs/blocks'
+import {
+  BackgroundColors,
+  BorderColors,
+  BorderWidths,
+  Elevations,
+  IconColors,
+  RadiusScale,
+  SpaceScale,
+  TextColors,
+  TypographyStyles,
+} from './Semanticos.blocks'
+
+<Meta title="Fundamentos/Semánticos" />
+
+# Semánticos
+
+Son los tokens de la capa **semantic** de `tokens/tokens.json`. Dicen **para qué sirve** cada valor. Cada uno es un alias a un primitivo, que aparece debajo de su nombre después de la flecha (→).
+
+Todo lo que se ve en esta página se lee de `tokens.json`. Cómo se construye y se nombra un token está en `tokens/README.md`.
+
+Los colores de texto, icono y borde muestran su **contraste** sobre el fondo para el que están pensados, con el mínimo de WCAG 2.2 AA:
+- 4,5:1 para el texto;
+- 3:1 para los iconos y los bordes de los controles.
+
+Lo desactivado y los bordes decorativos no tienen mínimo.
+
+## Color de fondo
+
+Cada fondo lleva encima el texto pensado para él.
+
+<Unstyled>
+  <BackgroundColors />
+</Unstyled>
+
+## Color de texto
+
+Cada texto aparece sobre su fondo. Los de rol se muestran también sobre su fondo suave (`subtle`), y los `inverted`, sobre el fondo sólido de su rol.
+
+<Unstyled>
+  <TextColors />
+</Unstyled>
+
+## Color de icono
+
+<Unstyled>
+  <IconColors />
+</Unstyled>
+
+## Color de borde
+
+`focus` se muestra como el contorno que aparece al llegar a un elemento con el teclado.
+
+<Unstyled>
+  <BorderColors />
+</Unstyled>
+
+## Estilos de texto
+
+Cada estilo se monta con tres piezas: `font-size`, `line-height` y `font-weight`. El interlineado es siempre un alias a la escala de `line-height`, nunca una proporción.
+
+<Unstyled>
+  <TypographyStyles />
+</Unstyled>
+
+## Espaciado
+
+<Unstyled>
+  <SpaceScale />
+</Unstyled>
+
+## Radios
+
+<Unstyled>
+  <RadiusScale />
+</Unstyled>
+
+## Grosores de borde
+
+<Unstyled>
+  <BorderWidths />
+</Unstyled>
+
+## Elevación
+
+Cada elevación es una sombra montada con las piezas de `primitive.shadow`: desplazamiento, desenfoque y color.
+
+<Unstyled>
+  <Elevations />
+</Unstyled>
