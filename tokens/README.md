@@ -22,7 +22,7 @@ component   →   semantic   →   primitive
 | --- | --- | --- | --- |
 | `primitive` | **Qué valor es.** Valores en bruto, sin significado: un azul, 16 px… | `primitive.color.blue.500` | Un valor literal, como un color o una medida |
 | `semantic` | **Para qué sirve.** El papel del valor en la interfaz: el fondo principal, el texto de error… | `semantic.color.text.error` | Un alias a un token `primitive` |
-| `component` | **Dónde se usa.** Las decisiones de un componente concreto | `component.button.color.background.brand.hover` | Un alias a un token `semantic` |
+| `component` | **Dónde se usa.** Las decisiones de un componente concreto | `component.button.background.brand.hover` | Un alias a un token `semantic` |
 
 ### La regla de los alias: cada nivel solo apunta al de abajo
 
@@ -104,9 +104,15 @@ Como cada valor pertenece a una sola parte, siempre se sabe qué es cada una. Po
 | `color.text.error.inverted` | Texto sobre el fondo sólido de error |
 | `color.border.focus` | Contorno del foco del teclado (sin rol: solo el estado) |
 
-**En el nivel `component`**, la fórmula va precedida del nombre del componente: `[component].[category].[element].[role].[modifier].[state]`. Por ejemplo:
-- `button.color.background.brand.hover`;
-- `input.color.border.error`.
+**En el nivel `component`**, los colores siguen el mismo orden que en `semantic`, pero con el nombre del componente en lugar de `color`: `[component].[element].[role].[modifier].[state]`.
+- **El nombre repite el del semántico al que apunta.** Por ejemplo, `button.background.brand.hover` apunta a `color.background.brand.hover`.
+- **El componente sustituye a `color`**, porque el elemento (`background`, `text`, `icon` o `border`) ya dice que es un color.
+- Así se ve de un vistazo qué semántico usa cada parte del componente.
+
+Ejemplos:
+- `button.background.brand.hover` → `color.background.brand.hover`;
+- `button.icon.brand.inverted` → `color.icon.brand.inverted`;
+- `input.border.error` → `color.border.error`.
 
 ### El resto de tokens con significado
 
@@ -120,6 +126,20 @@ Como cada valor pertenece a una sola parte, siempre se sabe qué es cada una. Po
 
 - **El interlineado (`typography.line-height`) es siempre un alias** a la escala `primitive.line-height`, nunca una proporción como `1.5`.
 - **No hay tokens de maquetación** (anchos de página, columnas…). Los anchos de pantalla solo existen como primitivos (`primitive.breakpoint`).
+
+### El resto de tokens de componente: `[component].[property].[part|size]`
+
+Para lo que no es color, el nombre dice **qué propiedad** del componente es y, si hace falta, **de qué parte** o **de qué tamaño**:
+
+| Parte del nombre | Valores |
+| --- | --- |
+| `property` | `padding`, `padding-x`, `gap`, `radius`, `border-width`, `font-size`, `line-height`, `font-weight` y `elevation` |
+| `part` | Una parte con nombre del componente: `label`, `message`, `title`, `icon`, `header`, `footer`, `focus`… |
+| `size` | `sm` o `lg`, cuando el valor cambia con el tamaño del componente |
+
+- **El token sin `part` ni `size` es el del caso normal:** la parte principal, en el tamaño mediano (`md`). Por ejemplo, `button.padding-x` es el espacio lateral del botón mediano, y `button.padding-x.sm` el del pequeño.
+- **Los estilos de texto se reparten en sus tres piezas.** Por ejemplo, el título de una tarjeta usa `card.font-size.title`, `card.line-height.title` y `card.font-weight.title`.
+- **El tamaño de los iconos no tiene token todavía**, porque no hay un semántico para él.
 
 ## 3. El formato: DTCG
 
@@ -199,7 +219,7 @@ Una sombra (`$type: "shadow"`) es un valor compuesto por piezas: `color`, `offse
 
 ## Ejemplo completo con los tres niveles
 
-Un token por nivel, encadenados con alias. Los dos primeros son reales y están en `tokens.json`. El de `component` es de ejemplo, porque ese nivel todavía no existe.
+Un token por nivel, encadenados con alias. Los tres son reales y están en `tokens.json`.
 
 ```json
 {
@@ -229,14 +249,12 @@ Un token por nivel, encadenados con alias. Los dos primeros son reales y están 
   },
   "component": {
     "button": {
-      "color": {
-        "background": {
-          "$type": "color",
-          "brand": {
-            "$root": {
-              "$value": "{semantic.color.background.brand.$root}",
-              "$description": "Fondo del botón principal en reposo."
-            }
+      "background": {
+        "$type": "color",
+        "brand": {
+          "$root": {
+            "$value": "{semantic.color.background.brand.$root}",
+            "$description": "Fondo del botón primary."
           }
         }
       }
@@ -250,7 +268,7 @@ Un token por nivel, encadenados con alias. Los dos primeros son reales y están 
 - [ ] **Nivel:** está en el nivel correcto: `primitive` (qué valor es), `semantic` (para qué sirve) o `component` (dónde se usa).
 - [ ] **Nombre:**
   - los primitivos siguen `[category].[scale].[step]`;
-  - los colores de `semantic` siguen la fórmula, en su orden y sin las partes que no aplican; los de `component` la llevan precedida del nombre del componente;
+  - los colores de `semantic` siguen la fórmula, en su orden y sin las partes que no aplican; los de `component` empiezan por el nombre del componente en lugar de `color`, y repiten el nombre del semántico al que apuntan;
   - el resto sigue la tabla «El resto de tokens con significado»;
   - cada parte usa un valor de las tablas de este manual.
 - [ ] **`$value` y `$description`:** el token tiene los dos, y la descripción explica qué es o para qué sirve.
@@ -264,4 +282,4 @@ Un token por nivel, encadenados con alias. Los dos primeros son reales y están 
 
 - **`primitive`:** 168 tokens. **Todavía no cumplen la regla de `$description`:** solo 2 la tienen. Se completará en su propia PR.
 - **`semantic`:** 97 tokens. Todos tienen `$description` y solo usan alias a `primitive`.
-- **`component`:** todavía no existe. Se añadirá cuando los componentes empiecen a usar tokens.
+- **`component`:** 120 tokens: Button (35), Input (29), Card (26) y Badge (30). Todos tienen `$description` y solo usan alias a `semantic`. Los componentes todavía no los usan.

@@ -1,6 +1,7 @@
 import { Meta, Unstyled } from '@storybook/addon-docs/blocks'
 import {
   BackgroundColors,
+  ComponentTokens,
   BorderColors,
   BorderWidths,
   Elevations,
@@ -87,4 +88,38 @@ Cada elevación es una sombra montada con las piezas de `primitive.shadow`: desp
 
 <Unstyled>
   <Elevations />
+</Unstyled>
+
+## Tokens de componente
+
+Son los tokens de la capa **component**: las decisiones de cada componente de `src/components/`. Cada uno es un alias a un token semántico.
+
+Debajo de cada nombre aparecen:
+- el **semántico** al que apunta (→);
+- más pequeño, el **primitivo** en el que acaba la cadena.
+
+Los nombres siguen el mismo orden que los semánticos, con el componente delante: `button.background.brand.hover` apunta a `color.background.brand.hover`.
+
+### Button
+
+<Unstyled>
+  <ComponentTokens component="button" />
+</Unstyled>
+
+### Input
+
+<Unstyled>
+  <ComponentTokens component="input" />
+</Unstyled>
+
+### Card
+
+<Unstyled>
+  <ComponentTokens component="card" />
+</Unstyled>
+
+### Badge
+
+<Unstyled>
+  <ComponentTokens component="badge" />
 </Unstyled>
